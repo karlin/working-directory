@@ -78,6 +78,13 @@ scheme's name is recorded in the $WDHOME/currentscheme file.
  Please report any to me!
  karlinfox_yahoo.com
 
+-- SIMILAR PROJECTS
+
+Working Directory is unique in its schemes and quick aliases, but there are more generic directory management and bookmarking tools out there:
+
+* CDargs: http://www.skamphausen.de/cgi-bin/ska/CDargs
+* apparix: http://micans.org/apparix
+
 -- LICENSE
 Working Directory is licensed under the GPL:
 
