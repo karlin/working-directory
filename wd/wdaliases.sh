@@ -10,7 +10,9 @@ if [ -z "$WDHOME" ]; then
 fi
 
 # add bash completion
-source $WDHOME/completion.sh
+if [ $SHELL = "/bin/bash" ]; then
+  source $WDHOME/completion.sh
+fi
 
 # slurp current scheme
 wdscheme=`cat $WDHOME/currentscheme`
@@ -56,7 +58,7 @@ alias wdl='$WDHOME/wdlist.pl'
 alias wdc=">\"\`$WDHOME/wdscheme.pl\`\""
 
 # changes schemes: wdscheme <scheme>
-alias wdscheme='. $WDHOME/wdscheme.sh'
+alias wdscheme='$WDHOME/wdscheme.sh'
 
 # dumps working dirs to environment vars
 alias wdenv="$WDHOME/wdenv.pl > $WDHOME/wdenv && . $WDHOME/wdenv"
