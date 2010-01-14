@@ -55,7 +55,7 @@ alias wds9='$WDHOME/cdstore.pl 9'
 alias wdl='$WDHOME/wdlist.pl'
 
 # wdc clears the stored list of directories
-alias wdc=">\"\`$WDHOME/wdscheme.pl\`\""
+alias wdc="echo -n '' >\"\`$WDHOME/wdscheme.pl\`\""
 
 # changes schemes: wdscheme <scheme>
 alias wdscheme='$WDHOME/wdscheme.sh'
