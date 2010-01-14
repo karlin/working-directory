@@ -3,7 +3,7 @@
 # wdscheme
 # used to manage stored directory schemes for wd.
 
-# Record repvious scheme
+# Record previous scheme
 if [ -z "$WDSCHEME" ]; then
  prevscheme=`cat $WDHOME/currentscheme`
 else
@@ -22,7 +22,7 @@ if [ -z "$1" ]; then
 
 else 
 
-  # File  used by previous scheme
+  # File used by previous scheme
 	oldfile=$WDHOME/${prevscheme}.scheme
 	if [ ! -e "$oldfile" ]; then
 	  echo "Your current wdscheme ($oldfile) is missing."

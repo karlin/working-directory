@@ -12,7 +12,7 @@ if ( ! -f "$wdfile" ) {
 		print STDERR "wdscheme file $wdfile was missing.\nUsing default scheme.\n";
 		$wdfile = "$wdhome/default.scheme";
 		if ( ! -s $wdfile) {
-				print STDERR "defualt scheme not found.\n";
+				print STDERR "default scheme not found.\n";
 				exit(1);
 		}
 		`echo 'default' > $wdhome/currentscheme`;
