@@ -61,5 +61,5 @@ alias wdc=">\"\`$WDHOME/wdscheme.pl\`\""
 alias wdscheme='$WDHOME/wdscheme.sh'
 
 # dumps working dirs to environment vars
-alias wdenv="$WDHOME/wdenv.pl > $WDHOME/wdenv && . $WDHOME/wdenv"
+alias wdenv="$WDHOME/wdenv.pl > $WDHOME/wdenv && source $WDHOME/wdenv"
 
