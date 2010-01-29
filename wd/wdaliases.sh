@@ -10,7 +10,7 @@ if [ -z "$WDHOME" ]; then
 fi
 
 # add bash completion
-if [ $SHELL = "/bin/bash" ]; then
+if [ ! -z "$BASH" ]; then
   source $WDHOME/completion.sh
 fi
 
