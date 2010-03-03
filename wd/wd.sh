@@ -1,5 +1,5 @@
 #!/bin/bash
-local ls_alias
+echo "START"
 # If no WDHOME is set, make it the default of ~/.wd
 if [ -z "$WDHOME" ]
 then
@@ -7,26 +7,39 @@ then
   echo "Using $WDHOME as \$WDHOME"
 fi
 
-# If there is no current scheme, assume 'default'
-if [ -z "$WDSCHEME" ]
+# If there is no valid current scheme, assume 'default'
+if [ -L "$WDHOME/current" -a -d "$WDHOME/current" ]
 then
-  if [ -z "$WDHOME/current" ]; then
+  if [ -z "$WDSCHEME" ]
+  then
+    export WDSCHEME=`readlink "$WDHOME/current"|cut -b $((${#WDHOME}+2))-`    
+  fi
+else
+  if [ -z "$WDSCHEME" ]
+  then
     echo "No scheme set, using 'default'"
     export WDSCHEME=default
-  else
-    export WDSCHEME=`readlink $WDHOME/current|awk -F '/' '{print $5;}'`
   fi
 fi
 
+function _current_wdscheme_dir() {
+  echo "$WDHOME/$WDSCHEME"
+}
+
 function _create_wdscheme () {
-  if [ ! -d $WDHOME/$WDSCHEME ]
+  if [ ! -d `_current_wdscheme_dir` ]
   then
     echo "Creating new scheme $WDSCHEME"
-    mkdir -p $WDHOME/$WDSCHEME
+    mkdir -p `_current_wdscheme_dir`
+    if [ -L "$WDHOME/current" -a -d "$WDHOME/current" ]
+    then
+      cp -r "$WDHOME/current"/* `_current_wdscheme_dir`/
+    fi
   fi
   
+  # remake the link for current wdscheme
   rm $WDHOME/current
-  ln -s $WDHOME/$WDSCHEME $WDHOME/current    
+  ln -s `_current_wdscheme_dir` $WDHOME/current    
 }
 
 # Make the scheme dir and link it to current if not already done
@@ -37,6 +50,7 @@ fi
 
 # Function to store directories 
 function wdstore () {
+  local slot dir
   if [ -z "$1" ]
   then
     # must be trying to store into slot 0
@@ -66,16 +80,17 @@ function wdstore () {
 }
 
 function wdretr () {
+  local slot
   if [ -z "$1" ]
   then
-    d="0"
+    slot="0"
   else
-    d="$1"
+    slot="$1"
   fi
 
-  if [ -e "$WDHOME/current/$d" ]
+  if [ -e "$WDHOME/current/$slot" ]
   then
-    cd -P "$WDHOME/current/$d"
+    cd -P "$WDHOME/current/$slot"
   fi  
 }
   
@@ -97,7 +112,7 @@ do
   alias wd$i="wdretr $i"
 done
 
-alias wdl="ls -l $WDHOME/current/|cut -d' ' --complement -f 1,2,3,4,5,6,7|tail -n +2"
+alias wdl="`which ls` -l "$WDHOME/'$WDSCHEME'"|cut -d' ' --complement -f 1,2,3,4,5,6,7|tail -n +2"
 
 function wdscheme () {
   if [ -z "$1" ]
@@ -111,20 +126,17 @@ function wdscheme () {
 
 function _wdschemecomplete()
 {
-		local cur schemedir origdir
-		origdir=${PWD}
-		schemedir=${WDHOME}
 		COMPREPLY=()
-		cur=${COMP_WORDS[COMP_CWORD]}
-		cd ${schemedir}
-		COMPREPLY=( $( compgen -G "${cur}*.scheme" | sed 's/\.scheme//g') )
-		cd ${origdir}
-		return 0
+		cur=${COMP_WORDS[COMP_CWORD]}		
+		COMPREPLY=( $( compgen -d "$WDHOME/$cur"|grep -v '/current$'|cut -b $((${#WDHOME}+2))-) )
 }
-complete -F _wdschemecomplete wdscheme
+complete -o nospace -F _wdschemecomplete wdscheme
 
 if [ ! -z $ls_alias ]
 then
   alias ls=$ls_alias
 fi
 
+alias wdc="rm `_current_wdscheme_dir`/*"
+
+echo "..FINISH"
