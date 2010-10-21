@@ -5,6 +5,7 @@
 #echo ' - consider allowing "diskless" mode that uses only env. vars'
 #echo " - add prompt for wdc when WDC_ASK is set"
 #echo " - allow schemes with spaces in the name"
+#echo " - make wdschemecompletion not depend on sed"
 
 # If no WDHOME is set, make it the default of ~/.wd
 if [ -z "$WDHOME" ]
@@ -74,23 +75,18 @@ function _load_wdenv() {
 # If there is no valid current scheme, assume 'default'
 if [ ! -f "$WDHOME/$WDSCHEME.scheme" -o -z "$WDSCHEME" ] # we don't have it in the env.
 then
-  #echo '* $WDSCHEME was invalid or not found'
   if [ -f "$WDHOME/current_scheme" ] # but we do have it stored
   then
     if [ -f $(_stored_scheme_filename) ]
     then
-      #echo "Loading stored scheme: $(_stored_scheme_name)" 
       export WDSCHEME=$(_stored_scheme_name) # load the stored scheme into the env.
     else
-      #echo '* current_scheme was there but did not contain a useable scheme name'
       _create_wdscheme
     fi
   else
     echo "No scheme set, using 'default'."
     export WDSCHEME=default
   fi
-#else
-  #echo "* already have scheme: $WDSCHEME"
 fi
 
 if [ -f "$WDHOME/current_scheme" ]
@@ -110,11 +106,9 @@ function wdscheme() {
     export WDSCHEME="$1"
     if [ -f "$WDHOME/${1}.scheme" ]
     then
-      #echo "* already have this schema"
       _load_wdenv
       _set_stored_scheme
     else
-      #echo "* new schema"
       _init_wdscheme
     fi
     
@@ -153,19 +147,12 @@ function wdstore() {
     dir="$2"
   fi
   
-  #echo "* wdstore ${slot}: ${dir}"
-
 # Read the existing slots from the scheme file
   _ifs_tmp=$IFS
   IFS=$'\n'
   slots=( $(cat $(_env_scheme_filename)) )
-  #(( j = $slot + 1 ))
-#echo 1
-#set|grep ^slots
 # Store the specified dir into the specified slot
   slots[$slot]="$dir"
-#echo 2
-#set|grep ^slots
 # Write all slots back to the scheme file
   #for (( i = 0 ; i < ${#slots[@]} ; i++ ))
   for i in 0 1 2 3 4 5 6 7 8 9
@@ -180,8 +167,6 @@ function wdstore() {
 
   done > $(_env_scheme_filename)
   IFS=$_ifs_tmp                                      
-#echo 3
-#set|grep ^slots
 
 # Update the alias for the new slot
   alias wd${slot}="wdretr $slot"
@@ -201,8 +186,6 @@ function wdretr() {
   _ifs_tmp=$IFS
   IFS=$'\n'
   slots=( $(cat $(_env_scheme_filename)) )
-  #(( slot = $slot + 1 ))
-  #echo "* wdretr ${slot}: cd ${slots[$slot]}"
   if [ ! ${slots[$slot]} == '.' ]
   then
     cd ${slots[$slot]}
@@ -216,37 +199,20 @@ function wdl() {
   IFS=$'\n'
   slots=( $(cat $(_env_scheme_filename)) )
   IFS=$_ifs_tmp                                      
-  # if [ "- - - - - - - - - -" == "$slots" ]
-  # then
-    # for i in 0 1 2 3 4 5 6 7 8 9
-    # do
-      # echo "$i"
-    # done
-  # else
-    for j in 0 1 2 3 4 5 6 7 8 9
-    do
-      #(( j = $i - 1 ))
-      if [ "${slots[$j]}" != "." ]
-      then
-        echo "${j} ${slots[$j]}"
-      else
-        echo "${j}"
-      fi
-    done
-  # fi
-#echo 5
-#set|grep ^slots
+  for j in 0 1 2 3 4 5 6 7 8 9
+  do
+    if [ "${slots[$j]}" != "." ]
+    then
+      echo "${j} ${slots[$j]}"
+    else
+      echo "${j}"
+    fi
+  done
 }
 
 function wdc() {
-  #if [ -z $WDC_ASK ]
-  #then
-  #  > $(_env_scheme_filename)
-  #else
-    #> $(_env_scheme_filename)
   echo -e ".\n.\n.\n.\n.\n.\n.\n.\n.\n.\n" > $(_env_scheme_filename)
   _load_wdenv
-  #fi
 }
 
 alias wds='wdstore 0'
@@ -254,28 +220,9 @@ for i in 0 1 2 3 4 5 6 7 8 9
 do
   alias wds$i="wdstore $i"
 done
-
-#ls_alias=`alias ls 2> /dev/null`
-#if [ ! -z $ls_alias ]
-#then
-#  unalias ls
-#fi
   
 alias wd='wdretr 0'
 for i in 0 1 2 3 4 5 6 7 8 9
 do
   alias wd$i="wdretr $i"
 done
-
-# function _wdschemecomplete()
-# {
-		# COMPREPLY=()
-		# cur=${COMP_WORDS[COMP_CWORD]}		
-		# COMPREPLY=( $( compgen -d "$WDHOME/$cur"|grep -v '/current$'|cut -b $((${#WDHOME}+2))-) )
-# }
-# complete -o nospace -F _wdschemecomplete wdscheme
- 
-#if [ ! -z $ls_alias ]
-#then
-#  alias ls=$ls_alias
-#fi
