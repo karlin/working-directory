@@ -2,7 +2,6 @@
 #echo ' - remove aliases when slots are set to .'
 #echo ' - only have wd* (retr) aliases for filled slots'
 #echo ' - consider replacing wdretr with just cd $WD${i} ??'
-#echo ' - consider allowing "diskless" mode that uses only env. vars'
 #echo " - add prompt for wdc when WDC_ASK is set"
 #echo " - allow schemes with spaces in the name"
 #echo " - make wdschemecompletion not depend on sed"
@@ -14,52 +13,48 @@ then
   echo "Using $WDHOME as \$WDHOME."
 fi
 
-function _stored_scheme_name() {
+function _wd_stored_scheme_name() {
   echo $(cat "$WDHOME/current_scheme")
 }
 
-function _stored_scheme_filename() {
-  echo "$WDHOME/$(_stored_scheme_name).scheme"
+function _wd_stored_scheme_filename() {
+  echo "$WDHOME/$(_wd_stored_scheme_name).scheme"
 }
 
-function _stored_scheme() {
-  cat $(_stored_scheme_filename)
-}
-
-function _env_scheme_filename() {
+function _wd_env_scheme_filename() {
   echo "$WDHOME/$WDSCHEME.scheme"
 }
 
-function _set_stored_scheme() {
+function _wd_set_stored_scheme() {
   echo $WDSCHEME > "$WDHOME/current_scheme"
 }
 
-function _create_wdscheme() {
+function _wd_create_wdscheme() {
   echo "Creating new scheme $WDSCHEME"
   mkdir -p $WDHOME
-  _set_stored_scheme
-  echo -e ".\n.\n.\n.\n.\n.\n.\n.\n.\n.\n" > $(_env_scheme_filename)
+  _wd_set_stored_scheme
+  echo -e ".\n.\n.\n.\n.\n.\n.\n.\n.\n.\n" > $(_wd_env_scheme_filename)
 }
 
-function _init_wdscheme() {
+function _wd_init_wdscheme() {
   if [ -f "$WDHOME/current_scheme" ]
   then
-    if [ "$(_stored_scheme_filename)" != "$(_env_scheme_filename)" ] # we have a diff. scheme stored
+    if [ "$(_wd_stored_scheme_filename)" != "$(_wd_env_scheme_filename)" ] # we have a diff. scheme stored
     then
-      echo "Cloning $(_stored_scheme_filename) new scheme $WDSCHEME"
-      cp "$(_stored_scheme_filename)" "$(_env_scheme_filename)" # clone it
-      _set_stored_scheme
+      echo "Cloning $(_wd_stored_scheme_filename) new scheme $WDSCHEME"
+      cp "$(_wd_stored_scheme_filename)" "$(_wd_env_scheme_filename)" # clone it
+      _wd_set_stored_scheme
     fi
   else
-    _create_wdscheme
+    _wd_create_wdscheme
   fi
 }
 
-function _load_wdenv() {
+function _wd_load_wdenv() {
   local slots _ifs_tmp i
   _ifs_tmp=$IFS
   IFS=$'\n'
-  slots=( $(cat $(_env_scheme_filename)) )
+  slots=( $(cat $(_wd_env_scheme_filename)) )
   for i in 0 1 2 3 4 5 6 7 8 9
   do
     if [ "${slots[$i]}" != "." ]
@@ -77,11 +72,11 @@ if [ ! -f "$WDHOME/$WDSCHEME.scheme" -o -z "$WDSCHEME" ] # we don't have it in t
 then
   if [ -f "$WDHOME/current_scheme" ] # but we do have it stored
   then
-    if [ -f $(_stored_scheme_filename) ]
+    if [ -f $(_wd_stored_scheme_filename) ]
     then
-      export WDSCHEME=$(_stored_scheme_name) # load the stored scheme into the env.
+      export WDSCHEME=$(_wd_stored_scheme_name) # load the stored scheme into the env.
     else
-      _create_wdscheme
+      _wd_create_wdscheme
     fi
   else
     echo "No scheme set, using 'default'."
@@ -92,10 +87,10 @@ fi
 if [ -f "$WDHOME/current_scheme" ]
 then
   # load current scheme slots
-  _load_wdenv                                      
+  _wd_load_wdenv                                      
 else
   # Store the scheme file if it's not already there
-  _init_wdscheme
+  _wd_init_wdscheme
 fi
 
 function wdscheme() {
@@ -106,16 +101,16 @@ function wdscheme() {
     export WDSCHEME="$1"
     if [ -f "$WDHOME/${1}.scheme" ]
     then
-      _load_wdenv
-      _set_stored_scheme
+      _wd_load_wdenv
+      _wd_set_stored_scheme
     else
-      _init_wdscheme
+      _wd_init_wdscheme
     fi
     
   fi
 }
 
-function _wdschemecomplete() {
+function _wd_scheme_completion() {
   local cur schemedir origdir
   origdir=${PWD}
   schemedir=${WDHOME}
@@ -126,7 +121,7 @@ function _wdschemecomplete() {
   #COMPREPLY=${COMPREPLY[@]%.scheme}
   cd ${origdir}
 }
-complete -o nospace -F _wdschemecomplete wdscheme
+complete -o nospace -F _wd_scheme_completion wdscheme
 
 # Function to store directories 
 function wdstore() {
@@ -150,7 +145,7 @@ function wdstore() {
 # Read the existing slots from the scheme file
   _ifs_tmp=$IFS
   IFS=$'\n'
-  slots=( $(cat $(_env_scheme_filename)) )
+  slots=( $(cat $(_wd_env_scheme_filename)) )
 # Store the specified dir into the specified slot
   slots[$slot]="$dir"
 # Write all slots back to the scheme file
@@ -165,7 +160,7 @@ function wdstore() {
       echo "."
     fi
 
-  done > $(_env_scheme_filename)
+  done > $(_wd_env_scheme_filename)
   IFS=$_ifs_tmp                                      
 
 # Update the alias for the new slot
@@ -185,7 +180,7 @@ function wdretr() {
 
   _ifs_tmp=$IFS
   IFS=$'\n'
-  slots=( $(cat $(_env_scheme_filename)) )
+  slots=( $(cat $(_wd_env_scheme_filename)) )
   if [ ! ${slots[$slot]} == '.' ]
   then
     cd ${slots[$slot]}
@@ -197,7 +192,7 @@ function wdl() {
   local slots _ifs_tmp i j
   _ifs_tmp=$IFS
   IFS=$'\n'
-  slots=( $(cat $(_env_scheme_filename)) )
+  slots=( $(cat $(_wd_env_scheme_filename)) )
   IFS=$_ifs_tmp                                      
   for j in 0 1 2 3 4 5 6 7 8 9
   do
@@ -211,8 +206,8 @@ function wdl() {
 }
 
 function wdc() {
-  echo -e ".\n.\n.\n.\n.\n.\n.\n.\n.\n.\n" > $(_env_scheme_filename)
-  _load_wdenv
+  echo -e ".\n.\n.\n.\n.\n.\n.\n.\n.\n.\n" > $(_wd_env_scheme_filename)
+  _wd_load_wdenv
 }
 
 alias wds='wdstore 0'
