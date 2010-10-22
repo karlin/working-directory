@@ -3,7 +3,7 @@ if [ ! -d "$HOME" ]; then
   echo You must have \$HOME set first.
 fi
 
-mkdir $HOME/.wd
+mkdir -p $HOME/.wd
 cp -i ./wd/* $HOME/.wd
 cp ./README $HOME/.wd
 if [ -d "$HOME/.wd" ]; then
