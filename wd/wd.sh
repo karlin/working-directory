@@ -181,11 +181,12 @@ function wdretr() {
   _ifs_tmp=$IFS
   IFS=$'\n'
   slots=( $(cat $(_wd_env_scheme_filename)) )
+  IFS=$_ifs_tmp
+  
   if [ ! ${slots[$slot]} == '.' ]
   then
     cd ${slots[$slot]}
   fi
-  IFS=$_ifs_tmp
 }
 
 function wdl() {
