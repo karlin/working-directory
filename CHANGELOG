@@ -1,4 +1,8 @@
-2.0 - 20-11-2010
+2.1 - 13-11-2010
+   * rewrote file reading with advice from Wayne Seguin
+   * reformatted and fixed some code style issues
+
+2.0 - 20-10-2010
    * completed single-file, pure bash rewrite (no longer needs perl)
    * env. vars now auto-update
    * clear a single slot with a dot: 'wds3 .'
