@@ -1,13 +1,12 @@
 #echo 'TODO'
-#echo ' - remove aliases when slots are set to .'
-#echo ' - only have wd* (retr) aliases for filled slots'
-#echo ' - consider replacing wdretr with just cd $WD${i} ??'
-#echo " - add prompt for wdc when WDC_ASK is set"
-#echo " - allow schemes with spaces in the name"
-#echo " - make wdschemecompletion not depend on sed"
-#echo " - investigate issues with RVM on mac (no problem on linux, maybe?)"
-#echo " - allow infinite slots"
-#echo " - wdp & wdn: cd to previous or next slot if current dir is in current scheme"
+#echo ' - fix: remove aliases when slots are set to .'
+#echo ' - fix: only have wd* (retr) aliases for filled slots'
+#echo ' - add: consider replacing wdretr with just cd $WD${i} ??'
+#echo ' - add: add prompt for wdc (wds? )when WDC_ASK is set'
+#echo ' - fix: allow schemes with spaces in the name'
+#echo ' - fix: wdscheme switch does not update $WD* env vars'
+#echo ' - add: allow infinite slots'
+#echo ' - add: wdp & wdn: cd to previous or next slot if current dir is in current scheme'
 
 # If no WDHOME is set, make it the default of ~/.wd
 if [[ -z "$WDHOME" ]] ; then
