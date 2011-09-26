@@ -45,6 +45,12 @@ wd1     Jump to the directory in slot 1 (etc, etc)
 wdc     Clear all slots
 	
 Slot contents will persist from session to session.
+
+It's possible to clear only a single slot with '.'
+
+  $ wds3 .
+
+will result in slot 3 getting cleared of its contents.
 	
 A set of environment variables named after the slots ($WD0, $WD1,
 etc.) are created and updated as you modify the slots.
