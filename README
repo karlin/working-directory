@@ -44,26 +44,23 @@ wd      Jump to the default directory (slot 0)
 wd1     Jump to the directory in slot 1 (etc, etc)
 wdc     Clear all slots
 	
-Slot contents are stored in a file, wd.list, so they will persist from session 
-to session.
+Slot contents will persist from session to session.
 	
-*NOTE*: This also means that all shells share the same slot configuration;
-changes in one will be reflected in the other. This is a feature.
-
 A set of environment variables named after the slots ($WD0, $WD1,
-etc.) are created an updated as you modify the slots.
+etc.) are created and updated as you modify the slots.
 
 -- SCHEMES
 
-You can have as many schemes as you'd like. To change schemes, simply say
+Schemes can help you separate sets of directories commonly used for each task
+you work on on the command line. To change schemes, simply say:
 
-$ wdscheme myscheme
+  $ wdscheme myscheme
 
 ...where 'myscheme' is some label for your scheme. If the scheme file already
-existed, it will clone your current slots to the new scheme file and switch to
+exists, wd will clone your current slots to the new scheme file and switch to
 it.
 	
-If the scheme was new, a new .scheme file is created in $WDHOME and the new
+If the label is new, a new .scheme file is created in $WDHOME and the new
 scheme's name is recorded in the $WDHOME/current_scheme file.
 
 
@@ -78,9 +75,10 @@ more generic directory management and bookmarking tools out there:
 
 * CDargs: http://www.skamphausen.de/cgi-bin/ska/CDargs
 * apparix: http://micans.org/apparix
+* autojump: https://github.com/joelthelion/autojump/wiki
 
 Attention zsh users! You can still use wd but you'll have to use the legacy
-version written in sh and perl, wd-1.12
+version written in sh and perl, wd-1.12. (This can be found at https://github.com/karlin/working-directory/tree/master)
 
 -- LICENSE
 Working Directory is licensed under the GPL:
