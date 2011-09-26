@@ -1,7 +1,7 @@
 Working Directory
 
 * Developed by Karlin Fox at Atomic Object (http://atomicobject.com)
-* With help and advice by David Crosby
+* With help and advice from David Crosby and Wayne Seguin
 
 Requires bash.
 
@@ -62,11 +62,6 @@ it.
 	
 If the label is new, a new .scheme file is created in $WDHOME and the new
 scheme's name is recorded in the $WDHOME/current_scheme file.
-
-
--- BUGS
- Please report any to me!
- karlinfox_yahoo_com
 
 -- SIMILAR PROJECTS
 
