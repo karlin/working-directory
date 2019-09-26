@@ -25,8 +25,8 @@ equivalent thereof):
     source ~/.wd/wd.sh
 
 Note that there is a man page included. This file is not installed because
-of platform inconsitency. Please copy this file (wd.1.gz) to your man page
-directory. For linux, that is usually /usr/share/man/man1 or similar.
+of platform inconsitency. Please copy this file (`wd.1.gz`) to your man page
+directory. For linux, that is usually `/usr/share/man/man1` or similar.
 
 				
 ## USAGE
