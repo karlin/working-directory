@@ -1,10 +1,6 @@
-#echo 'TODO'
-#echo ' - remove aliases when slots are set to .'
-#echo ' - only have wd* (retr) aliases for filled slots'
-#echo ' - consider replacing wdretr with just cd $WD${i} ??'
-#echo " - add prompt for wdc when WDC_ASK is set"
-#echo " - allow schemes with spaces in the name"
-#echo " - allow infinite slots"
+setopt ksh_arrays
+autoload -U compinit && compinit
+autoload -U bashcompinit && bashcompinit
 
 # If no WDHOME is set, make it the default of ~/.wd
 if [[ -z "$WDHOME" ]] ; then
@@ -55,14 +51,13 @@ _wd_init_wdscheme()
 
 _wd_load_wdenv()
 {
-  local slots i index
-  index=0
+  local i
+  typeset -a slots
   while read -r line; do
-    slots[$index]="$line"
-    index=$((index + 1))
+    slots+=("$line")
   done < "$(_wd_env_scheme_filename)"
 
-  for (( i = 0 ; i < 10 ; i++ )); do
+  for i in {0..9}; do
     if [[ "${slots[$i]}" != "." ]] ; then
       export WD${i}="${slots[$i]}"
     else
@@ -126,9 +121,10 @@ complete -o nospace -F _wd_scheme_completion wdscheme
 # Function to store directories
 wdstore()
 {
-  local slot dir slots i index
+  local slot dir i
+  typeset -a slots
   if [[ -z "$1" ]] ; then
-    # no slot given so use 0
+    # must be trying to store into slot 0
     slot="0"
   else
     slot="$1"
@@ -142,69 +138,58 @@ wdstore()
   fi
 
   # Read the existing slots from the scheme file
-  index=0
   while read -r line; do
-    slots[$index]="$line"
-    index=$((index + 1))
+    slots+=("$line")
   done < "$(_wd_env_scheme_filename)"
 
   # Store the specified dir into the specified slot
   slots[$slot]="$dir"
   # Write all slots back to the scheme file
-  for (( i = 0 ; i < 10 ; i++ )); do
+  for i in {0..9}; do
     if [[ "${slots[$i]}" != '' ]] ; then
       echo "${slots[$i]}"
     else
       echo "."
     fi
+
   done > "$(_wd_env_scheme_filename)"
 
   # Update the alias for the new slot
-  if [[ "$slot" != '.' ]] ; then
-    alias wd${slot}="wdretr $slot"
-  else
-    echo "unalias wd${slot}"
-    unalias wd${slot}
-  fi
+  alias wd${slot}="wdretr $slot"
   # Store the new slot contents into the env.
   export WD${slot}="$dir"
 }
 
 wdretr()
 {
-  local slot slots index
+  local slot
+  typeset -a slots
   if [[ -z "$1" ]] ; then
     slot="0"
   else
     slot="$1"
   fi
-
-  index=0
   while read -r line; do
-    slots[$index]="$line"
-    index=$((index + 1))
+    slots+=("$line")
   done < "$(_wd_env_scheme_filename)"
   if [[ "${slots[$slot]}" != '.' ]] ;  then
+    echo "$slot: ${slots[$slot]}"
     cd "${slots[$slot]}"
   fi
 }
 
 wdl()
 {
-  local slots j index
+  local index
   index=0
   while read -r line; do
-    slots[$index]="$line"
+    if [[ "$line" != "." ]] ; then
+      echo "${index} $line"
+    else
+      echo "${index}"
+    fi
     index=$((index + 1))
   done < "$(_wd_env_scheme_filename)"
-
-  for (( j = 0 ; j < 10 ; j++ )); do
-    if [[ "${slots[$j]}" != "." ]] ; then
-      echo "${j} ${slots[$j]}"
-    else
-      echo "${j}"
-    fi
-  done
 }
 
 wdc()
@@ -214,11 +199,11 @@ wdc()
 }
 
 alias wds='wdstore 0'
-for (( i = 0 ; i < 10 ; i++ )); do
+for i in {0..9}; do
   alias wds$i="wdstore $i"
 done
 
 alias wd='wdretr 0'
-for (( i = 0 ; i < 10 ; i++ )); do
+for i in {0..9}; do
   alias wd$i="wdretr $i"
 done
