@@ -51,6 +51,7 @@ _wd_init_wdscheme()
 
 _wd_load_wdenv()
 {
+  setopt ksh_arrays
   local i
   typeset -a slots
   while read -r line; do
@@ -64,6 +65,7 @@ _wd_load_wdenv()
       unset WD${i}
     fi
   done
+  unsetopt ksh_arrays
 }
 
 # If there is no valid current scheme, assume 'default'
@@ -121,6 +123,7 @@ complete -o nospace -F _wd_scheme_completion wdscheme
 # Function to store directories
 wdstore()
 {
+  setopt ksh_arrays
   local slot dir i
   typeset -a slots
   if [[ -z "$1" ]] ; then
@@ -158,10 +161,12 @@ wdstore()
   alias wd${slot}="wdretr $slot"
   # Store the new slot contents into the env.
   export WD${slot}="$dir"
+  unsetopt ksh_arrays
 }
 
 wdretr()
 {
+  setopt ksh_arrays
   local slot
   typeset -a slots
   if [[ -z "$1" ]] ; then
@@ -176,6 +181,7 @@ wdretr()
     echo "$slot: ${slots[$slot]}"
     cd "${slots[$slot]}"
   fi
+  unsetopt ksh_arrays
 }
 
 wdl()
@@ -207,3 +213,5 @@ alias wd='wdretr 0'
 for i in {0..9}; do
   alias wd$i="wdretr $i"
 done
+
+unsetopt ksh_arrays
