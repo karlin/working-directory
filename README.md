@@ -3,7 +3,8 @@
 * Developed by Karlin Fox
 * With help and advice from David Crosby and Wayne Seguin
 
-Compatible with bash or zsh. Please open an issue if you'd like support for your favorite shell!
+Compatible with bash or zsh. Please open an issue if you'd like support for
+your favorite shell!
 
 Working Directory (`wd`) is a simple set of aliases and shell functions that
 provides named storage of directories, as well as quick retrieval of
@@ -21,12 +22,13 @@ else, just put the files in the `wd` directory of the package wherever you
 want. Then add the following lines to your `.bashrc` file (or appropriate
 equivalent thereof):
 
-    export WDHOME=$HOME/.wd
-    source ~/.wd/wd.sh
+    export WDHOME="${HOME}/.wd"
+    source "${WDHOME}/wd.sh"
+    shopt -s direxpand # optional, for bash $WD[0-9] env. var. expansion
 
-Note that there is a man page included. This file is not installed because
-of platform inconsitency. Please copy this file (`wd.1.gz`) to your man page
-directory. For linux, that is usually `/usr/share/man/man1` or similar.
+Note that a man page is included but not installed due to platform
+inconsistency. Please copy the file (`wd.1.gz`) to your man page
+directory. For Linux, usually `/usr/share/man/man1`.
 
 				
 ## USAGE
@@ -79,7 +81,8 @@ more generic directory management and bookmarking tools out there:
 * [apparix](http://micans.org/apparix)
 * [autojump](https://github.com/joelthelion/autojump/wiki)
 
-Attention users of other shells! You can still use wd but you'll have to use the [legacy version written in sh and perl, wd-1.12](https://github.com/karlin/working-directory/tree/master)
+Attention users of other shells! You can still use wd but you'll have to use
+the [legacy version written in sh and perl, wd-1.12](https://github.com/karlin/working-directory/tree/master)
 
 ## LICENSE
 
