@@ -1,5 +1,5 @@
 # Working Directory
-# See README.md for description of this script!
+# See README.md for description of this shell script!
 
 # wd is a shell utility, so exit if not interactive:
 [[ $- != *i* ]] && return
@@ -64,11 +64,11 @@ _wd_stored_scheme_file()
   name="$(_wd_stored_scheme_name)"
   stored_scheme_filename="${WDHOME}/${name}.scheme"
   if [[ -f "$stored_scheme_filename" ]] ; then
-    unset _wd_create_pending
     echo "$stored_scheme_filename"
   else
-    # There was no stored scheme, create a new scheme or use default.
+    # There was no stored scheme--create a new scheme or use default
     if [[ "$name" == "$WD_DEFAULT_SCHEME_NAME" ]] ; then
+      # The default is the one missing--create it now to prevent loops
       touch "${WDHOME}/${WD_DEFAULT_SCHEME_NAME}.scheme"
       _wd_create_wdscheme
     else
@@ -83,7 +83,7 @@ _wd_stored_scheme_file()
 _wd_use_default_scheme()
 {
   echo "$WD_DEFAULT_SCHEME_NAME" > "$(_wd_current_scheme_file)"
-  # reset any env override too:
+  # reset any env override
   unset WDSCHEME
 }
 
@@ -153,7 +153,7 @@ _wd_load_wdenv()
       fi
     done
   else
-    >&2 echo -n "wd: stored scheme is missing, falling back to:"
+    >&2 echo -n "wd: stored scheme is missing, falling back to: "
     _wd_use_default_scheme
     _wd_stored_scheme_name
     _wd_load_wdenv
@@ -185,7 +185,7 @@ wdscheme()
         export WDSCHEME="$1"
       else
         echo "$1" > "$(_wd_current_scheme_file)"
-        # unset WDSCHEME # TODO doesn't work inside subshell expansions
+        # unset WDSCHEME # TODO unset doesn't work inside subshell expansions
       fi
       _wd_load_wdenv
     else
@@ -206,9 +206,6 @@ _wd_scheme_completion()
   cd "${schemedir}" || exit
   schemelist="$(compgen -o nospace -G "${cur}*.scheme")"
   COMPREPLY=( ${schemelist//.scheme/} )
-  # for s in $schemelist; do
-  #   COMPREPLY+=( "${s//.scheme/}" )
-  # done
   cd "${origdir}" || exit
 }
 complete -o nospace -F _wd_scheme_completion wdscheme
@@ -305,6 +302,8 @@ wdc()
     echo -e "." >> "$scheme_file"
   done
   _wd_load_wdenv
+  cat "$scheme_file"
+  >&2 echo "wd: ${scheme_file} cleared, previous contents shown above"
 }
 
 # Make wd and wds aliases in a function to prevent variable leakage
