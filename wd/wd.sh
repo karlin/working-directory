@@ -14,6 +14,7 @@ if [[ -z "$WDHOME" ]] ; then
 fi
 
 WD_SLOT_LIMIT=10 # 0-9 for one-keystroke slot names; add more if you want!
+WD_DEFAULT_SCHEME_NAME=default
 
 # Prints the path to the file that holds the name of the current scheme.
 # e.g. "~/.wd/current_scheme"
@@ -26,7 +27,7 @@ _wd_current_scheme_file()
 # e.g. "project" (not the file path like "~/.wd/project.scheme").
 # This may be temporary--when called from wdscheme,
 # or it may come from the current scheme file,
-# or it may be unset, in which case we use (and store) "default".
+# or it may be unset, in which case we use (and store) a default.
 _wd_stored_scheme_name()
 {
   local scheme currentscheme_file
@@ -53,8 +54,8 @@ _wd_stored_scheme_name()
   unset _temp_wdscheme
 }
 
-# Print the path to the current scheme file, which may be constructed from the
-# current scheme. The file is created if it doesn't already exist, and a
+# Print the path of the current scheme file, constructed from the current
+# scheme's name. The file is created if it doesn't already exist, and a
 # default is used if no name is set.
 # e.g. "~/.wd/myscheme.scheme"
 _wd_stored_scheme_file()
@@ -66,9 +67,11 @@ _wd_stored_scheme_file()
     unset _wd_create_pending
     echo "$stored_scheme_filename"
   else
-    if [[ -z "$_wd_create_pending" ]] ; then
-      # There was no stored scheme and no pending creation, create a new scheme
-      _wd_create_pending=1
+    # There was no stored scheme, create a new scheme or use default.
+    if [[ "$name" == "$WD_DEFAULT_SCHEME_NAME" ]] ; then
+      touch "${WDHOME}/${WD_DEFAULT_SCHEME_NAME}.scheme"
+      _wd_create_wdscheme
+    else
       >&2 echo "wd: scheme file '${stored_scheme_filename}' not found, using default."
       _wd_use_default_scheme
       _wd_stored_scheme_file
@@ -76,17 +79,17 @@ _wd_stored_scheme_file()
   fi
 }
 
-# Stores "default" as the current scheme.
+# Stores WD_DEFAULT_SCHEME_NAME as the current scheme.
 _wd_use_default_scheme()
 {
-  echo 'default' > "$(_wd_current_scheme_file)"
+  echo "$WD_DEFAULT_SCHEME_NAME" > "$(_wd_current_scheme_file)"
   # reset any env override too:
   unset WDSCHEME
 }
 
 # Stores the current scheme name and writes an empty scheme
 # to the current scheme file, which either already exists or
-# is created as "default".
+# is created.
 _wd_create_wdscheme()
 {
   local scheme scheme_file
@@ -150,11 +153,9 @@ _wd_load_wdenv()
       fi
     done
   else
-    >&2 echo "wd: stored scheme is missing, falling back to:"
+    >&2 echo -n "wd: stored scheme is missing, falling back to:"
     _wd_use_default_scheme
-    if [[ ! -f "${WDHOME}/default.scheme" ]] ; then
-      _wd_create_wdscheme
-    fi
+    _wd_stored_scheme_name
     _wd_load_wdenv
   fi
 }
@@ -164,7 +165,7 @@ _wd_load_wdenv
 
 # Prints the current scheme or sets it to the given scheme name.
 # If no argument is given and no scheme is set, sets the current
-# scheme to "default".
+# scheme to a default.
 wdscheme()
 {
   local _temp_wdscheme shell_only
