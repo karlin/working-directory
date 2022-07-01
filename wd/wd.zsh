@@ -1,36 +1,44 @@
-# Working Directory
-# See README.md for description of this script!
+#!/bin/zsh
+
+# Working Directory (wd)
+# See README.md for a description of this script
 
 # wd is a shell utility, so exit if not interactive:
-[[ $- != *i* ]] && return
-
-# When this script is sourced, clear any temporary scheme from the env:
-unset WDSCHEME 
-
+# [[ $- != *i* ]] && return
 setopt ksh_arrays
 autoload -U compinit && compinit
 autoload -U bashcompinit && bashcompinit
-
+# When this script is sourced, clear any temporary scheme from the env:
+unset WDSCHEME
 # If no WDHOME is set, default to ~/.wd
 if [[ -z "$WDHOME" ]] ; then
   export WDHOME="${HOME}/.wd"
-  echo "Using ${WDHOME} as \$WDHOME."
+  >&2 echo "wd: Using ${WDHOME} as \$WDHOME."
 fi
 
 WD_SLOT_LIMIT=10 # 0-9 for one-keystroke slot names; add more if you want!
+WD_DEFAULT_SCHEME_NAME=default
 
-# Prints the path to the file that holds the name of the current scheme.
+# Print the path to the file that holds the name of the current scheme.
 # e.g. "~/.wd/current_scheme"
 _wd_current_scheme_file()
 {
-  echo "${WDHOME}/current_scheme"
+  local currentscheme
+  if [[ ! -w "$WDHOME" ]] ; then
+    mkdir -p "$WDHOME"
+  fi
+  currentscheme="${WDHOME}/current_scheme"
+  if [[ ! -f "$currentscheme" ]] ; then
+    echo "$WD_DEFAULT_SCHEME_NAME" > "$currentscheme"
+  fi
+  echo "$currentscheme"
 }
 
-# Prints only the name of the current scheme.
-# e.g. "project" (not the file path like "~/.wd/project.scheme").
+# Print only the name of the current scheme.
+# e.g. "project" (not the file path like "~/.wd/project.scheme".)
 # This may be temporary--when called from wdscheme,
 # or it may come from the current scheme file,
-# or it may be unset, in which case we use (and store) "default".
+# or it may be unset, in which case we use (and store) a default.
 _wd_stored_scheme_name()
 {
   local scheme currentscheme_file
@@ -42,10 +50,10 @@ _wd_stored_scheme_name()
     else
       currentscheme_file="$(_wd_current_scheme_file)"
       if [[ -f "$currentscheme_file" ]] ; then
-        exec 3< "$currentscheme_file"
-        read -r scheme <&3
+        exec 7< "$currentscheme_file"
+        read -r scheme <&7
         echo "$scheme"
-        exec 3<&-
+        exec 7<&-
         return
       else
         >&2 echo "wd: no current scheme set, using default."
@@ -57,8 +65,8 @@ _wd_stored_scheme_name()
   unset _temp_wdscheme
 }
 
-# Print the path to the current scheme file, which may be constructed from the
-# current scheme. The file is created if it doesn't already exist, and a
+# Print the path of the current scheme file, constructed from the current
+# scheme's name. The file is created if it doesn't already exist, and a
 # default is used if no name is set.
 # e.g. "~/.wd/myscheme.scheme"
 _wd_stored_scheme_file()
@@ -67,40 +75,36 @@ _wd_stored_scheme_file()
   name="$(_wd_stored_scheme_name)"
   stored_scheme_filename="${WDHOME}/${name}.scheme"
   if [[ -f "$stored_scheme_filename" ]] ; then
-    unset _wd_create_pending
     echo "$stored_scheme_filename"
   else
-    if [[ -z "$_wd_create_pending" ]] ; then
-      _wd_create_pending=1
-      # unset WDSCHEME
+    # There was no stored scheme--create a new scheme or use default
+    if [[ "$name" == "$WD_DEFAULT_SCHEME_NAME" ]] ; then
+      # The default is the one missing--create it now to prevent loops
+      : > "${WDHOME}/${WD_DEFAULT_SCHEME_NAME}.scheme"
+      _wd_create_wdscheme
+    else
       >&2 echo "wd: scheme file '${stored_scheme_filename}' not found, using default."
       _wd_use_default_scheme
+      # Call this function again now that a default was restored
       _wd_stored_scheme_file
     fi
   fi
 }
 
-# Stores "default" as the current scheme.
+# Store WD_DEFAULT_SCHEME_NAME as the current scheme.
 _wd_use_default_scheme()
 {
-  echo 'default' > "$(_wd_current_scheme_file)"
-  # reset any env override too:
+  echo "$WD_DEFAULT_SCHEME_NAME" > "$(_wd_current_scheme_file)"
+  # Reset any env override
   unset WDSCHEME
 }
 
-# Stores the current scheme name and writes an empty scheme
+# Store the current scheme name and write an empty scheme
 # to the current scheme file, which either already exists or
-# is created as "default".
+# is created.
 _wd_create_wdscheme()
 {
-  local scheme scheme_file
-  # if [[ "${FUNCNAME[1]}" -eq "_wd_stored_scheme_file" ]] ; then
-    # Called from within stored_scheme_file when
-    # the scheme file is not found, use default:
-    # _wd_create_default_wdscheme
-    # but don't overwrite it:
-    # return
-  # fi
+  local i scheme scheme_file
   scheme="$(_wd_stored_scheme_name)"
   scheme_file="$(_wd_stored_scheme_file)"
   if [[ ! -f "$scheme_file" ]] ; then
@@ -108,10 +112,7 @@ _wd_create_wdscheme()
     _temp_wdscheme="$name"
     _wd_use_default_scheme
   fi
-  echo "Creating new scheme ${scheme}"
-  if [[ ! -w "${WDHOME}" ]] ; then
-    mkdir -p "${WDHOME}"
-  fi
+  >&2 echo "wd: Creating new scheme ${scheme}"
   # Save the new scheme as current
   echo "$scheme" > "$(_wd_current_scheme_file)"
   if [[ -e "$scheme_file" ]] ; then
@@ -119,8 +120,8 @@ _wd_create_wdscheme()
     return
   fi
   # Fill in empty slots in the scheme file
-  echo -e "." > "$scheme_file"
-  for (( i = 1 ; i < WD_SLOT_LIMIT ; i++ )); do
+  : > "$scheme_file"
+  for (( i = 0 ; i < WD_SLOT_LIMIT ; i++ )); do
     echo -e "." >> "$scheme_file"
   done
 }
@@ -130,8 +131,9 @@ _wd_create_wdscheme()
 _wd_init_wdscheme()
 {
   if [[ -f "$(_wd_stored_scheme_file)" ]] ; then
-    if [[ "$(_wd_stored_scheme_name)" != "$1" ]] ; then # we have a diff. scheme stored
-      echo "Cloning $(_wd_stored_scheme_name) into new scheme ${1}"
+    if [[ "$(_wd_stored_scheme_name)" != "$1" ]] ; then
+      # Different name, init a new scheme
+      >&2 echo "wd: Cloning $(_wd_stored_scheme_name) into new scheme ${1}"
       cp "$(_wd_stored_scheme_file)" "${WDHOME}/${1}.scheme" # clone it
       echo "$1" > "$(_wd_current_scheme_file)"
     fi
@@ -159,11 +161,9 @@ _wd_load_wdenv()
       fi
     done
   else
-    >&2 echo "wd: stored scheme is missing, falling back to:"
+    >&2 echo -n "wd: stored scheme is missing, falling back to: "
     _wd_use_default_scheme
-    if [[ ! -f "$(_wd_stored_scheme_file)" ]] ; then
-      _wd_init_wdscheme 'default'
-    fi
+    _wd_stored_scheme_name
     _wd_load_wdenv
   fi
   unsetopt ksh_arrays
@@ -172,9 +172,9 @@ _wd_load_wdenv()
 # Load directory slots from the current scheme
 _wd_load_wdenv
 
-# Prints the current scheme or sets it to the given scheme name.
+# Print the current scheme or sets it to the given scheme name.
 # If no argument is given and no scheme is set, sets the current
-# scheme to "default".
+# scheme to a default.
 wdscheme()
 {
   local _temp_wdscheme shell_only
@@ -194,7 +194,7 @@ wdscheme()
         export WDSCHEME="$1"
       else
         echo "$1" > "$(_wd_current_scheme_file)"
-        # unset WDSCHEME # TODO doesn't work inside subshell expansions
+        # unset WDSCHEME # TODO unset doesn't work inside subshell expansions
       fi
       _wd_load_wdenv
     else
@@ -204,47 +204,50 @@ wdscheme()
 }
 
 # Use the list of scheme files to complete partial scheme names
-# TODO: wdschemes with spaces don't complete correctly :(
 _wd_scheme_completion()
 {
-  local cur schemedir origdir schemelist
-  origdir="${PWD}"
-  schemedir="${WDHOME}"
+  local cur scheme_dir saved_dir schemes scheme_comp
+  saved_dir="${PWD}"
+  scheme_dir="${WDHOME}"
   cur="${COMP_WORDS[COMP_CWORD]}"
   COMPREPLY=()
-  cd "${schemedir}" || exit
-  schemelist="$(compgen -o nospace -G "${cur}*.scheme")"
-  COMPREPLY=( ${schemelist//.scheme/} )
-  cd "${origdir}" || exit
+  cd "${scheme_dir}" || exit
+  schemes="$(compgen -o nospace -o filenames -G "${cur}*.scheme")"
+  local IFS=$'\n'
+  for scheme_comp in $schemes; do
+    # Remove any path chars added by compgen -o filenames
+    scheme_comp="${scheme_comp//\/}"
+    # Escape spaces with backslashes in scheme names so they fully complete
+    scheme_comp="${scheme_comp// /\\ }"
+    COMPREPLY+=( "${scheme_comp//.scheme}" )
+  done
+  cd "${saved_dir}" || exit
 }
 complete -o nospace -F _wd_scheme_completion wdscheme
 
-# Stores directory slots into the current scheme file
+# Store directory slots into the current scheme file
 wdstore()
 {
   setopt ksh_arrays
   local dir i line slot
   typeset -a slots
   if [[ -z "$1" ]] ; then
-    # no slot given so use 0
+    # No slot given so use 0
     slot="0"
   else
     slot="$1"
   fi
-
   if [[ -z "$2" ]] ; then
-    # one argument means store c  urrent dir in given slot
+    # One argument means store current dir in given slot
     dir="$(pwd)"
   else
-    # two args--store the first in the slot given by the second
+    # Two args--store the first in the slot given by the second
     dir="$2"
   fi
-
   # Read the existing slots from the scheme file
   while read -r line; do
     slots+=("$line")
   done < "$(_wd_stored_scheme_file)"
-
   # Store the specified dir into the specified slot
   slots[$slot]="$dir"
   # Write all slots back to the scheme file
@@ -255,17 +258,15 @@ wdstore()
       echo "."
     fi
   done > "$(_wd_stored_scheme_file)"
-
   # Update the alias for the new slot
   alias "wd${slot}=wdretr ${slot}"
-
   # Store the new slot contents into the env.
   export "WD${slot}=${dir}"
   unsetopt ksh_arrays
 }
 
-# Changes to the directory stored in the given slot of the current scheme file.
-# If no slot is given, changes to the director in slot 0.
+# Change to the directory stored in the given slot of the current scheme file.
+# If no slot is given, change to the directory in slot 0.
 wdretr()
 {
   setopt ksh_arrays
@@ -276,7 +277,6 @@ wdretr()
   else
     slot="$1"
   fi
-
   while read -r line; do
     slots+=("$line")
   done < "$(_wd_stored_scheme_file)"
@@ -286,7 +286,7 @@ wdretr()
   unsetopt ksh_arrays
 }
 
-# Prints the contents of the slots in the current scheme file.
+# Print directory slots from the current scheme file.
 wdl()
 {
   local index line
@@ -301,15 +301,23 @@ wdl()
   done < "$(_wd_stored_scheme_file)"
 }
 
-# Clears all slots in the current scheme file.
+# Clear all slots in the current scheme file.
 wdc()
-{  
-  local scheme_file
+{
+  local i line scheme_file
+  # TODO: prevent clearing default on fallback?
   scheme_file="$(_wd_stored_scheme_file)"
-  echo -e "." > "$scheme_file"
-  for (( i = 1 ; i < WD_SLOT_LIMIT ; i++ )); do
+  # Show previous contents in case it was a mistake
+  while read -r line; do
+    echo "$line"
+  done < "$scheme_file"
+  >&2 echo "wd: ${scheme_file} cleared (previous file contents shown above)"
+  # Truncate, then fill with empty slots
+  : > "$scheme_file"
+  for (( i = 0 ; i < WD_SLOT_LIMIT ; i++ )); do
     echo -e "." >> "$scheme_file"
   done
+  # Load the newly-empty slots
   _wd_load_wdenv
 }
 
@@ -317,13 +325,12 @@ wdc()
 _wd_create_aliases()
 {
   local i
-  # Make store aliases wds{0..n}, with the default alias "wds" the same as wds0.
+  # Make "store" aliases wds{0..n}, and "wds" as equivalent to "wds0".
   alias wds='wdstore 0'
   for (( i = 0 ; i < WD_SLOT_LIMIT ; i++ )); do
     alias "wds${i}=wdstore ${i}"
   done
-
-  # Make cd aliases wd{0..n}, with the default alias "wd" the same as wd0.
+  # Make cd aliases wd{0..n}, and "wd" as equivalent to "wd0".
   alias wd='wdretr 0'
   for (( i = 0 ; i < WD_SLOT_LIMIT ; i++ )); do
     alias "wd${i}=wdretr ${i}"

@@ -1,11 +1,18 @@
 
 ### TODO
-* WDSCHEME override can't be "unset" from subshell expansions, need to unroll nested functions
-* deleted "default.scheme" can cause infinite loop
+* WDSCHEME override can't be "unset" in subshell expansions, maybe need to unroll nested functions?
 
-### 3.1 - 2021-10-03
-* fix hang when current scheme disappears
+### 3.1 - 2022-07-01
+* use shellcheck
+* add tests using bats
+* update zsh parity
+* fix wdscheme name completion with spaces
+* fix deleted "default.scheme" can cause infinite loop
+* fix loop when current scheme disappears
 * slot limit is determined in one place
+* default scheme name is factored to a var
+* remove remaining uses of non-builtin shell commands (except mkdir)
+* wdc prints contents of schemefile it just nuked
 
 ### 3.0 - 2021-10-03
 * add wdscheme -t to set shell-local scheme override

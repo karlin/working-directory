@@ -14,7 +14,7 @@ if [ -d "${HOME}/.wd" ]; then
 	echo
 	echo \#\#\# ...use it in bash:
 	echo source \"\$\{WDHOME\}/wd.sh\"
-	echo shopt -s direxpand \# optional, for \$WD[0-9] env. var. expansion
+	echo shopt -s direxpand \# optional, for \$WD[0-9] env. var. completion
 	echo
 	echo \#\#\# ...use it in zsh:
 	echo source \"\$\{WDHOME\}/wd.zsh\"
