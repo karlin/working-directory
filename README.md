@@ -95,12 +95,18 @@ more generic directory management and bookmarking tools out there:
 * [apparix](https://github.com/micans/apparix)
 * [autojump](https://github.com/wting/autojump#name)
 
-Attention users of shells besides bash or zsh!: you can try the pure-shell version but if it doesn't work for you, try the legacy version written in sh and perl,
+Attention users of shells besides bash or zsh!: you can try the pure-shell version in `main` but if it doesn't work for you, try the legacy version written in sh and perl,
 [wd-1.12.](https://github.com/karlin/working-directory/tree/master)
 
 ## CHANGELOG
 
 See [CHANGELOG.md](CHANGELOG.md).
+
+## TESTING
+
+If you want to hack on wd, you can clone the repo's  `main` branch and run `git submodule init && git submodule update` to fetch `bats`. Before you can run the tests, you need to comment-out or remove the interactive shell check on line 7 of `wd/wd.sh`! If all the tests fail then you may have forgotten that step. Also sorry zsh folks, bats only supports bash.
+
+You can run the tests with `./test/bats/bin/bats test/wd.bats`.
 
 ## LICENSE
 

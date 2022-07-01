@@ -1,14 +1,14 @@
 #!/usr/bin/env bats
 
 setup() {
-    DIR="$( cd "$( dirname "$BATS_TEST_FILENAME" )" >/dev/null 2>&1 && pwd )"
-    load "test_helper/bats-support/load"
-    load "test_helper/bats-assert/load"
-    
-    export WDHOME="${BATS_TEST_TMPDIR}/.wd"
-    assert_not_equal "$WDHOME" "${HOME}/.wd"
+  DIR="$( cd "$( dirname "$BATS_TEST_FILENAME" )" >/dev/null 2>&1 && pwd )"
+  load "test_helper/bats-support/load"
+  load "test_helper/bats-assert/load"
+  
+  export WDHOME="${BATS_TEST_TMPDIR}/.wd"
+  assert_not_equal "$WDHOME" "${HOME}/.wd"
 
-    load "${DIR}/../wd/wd.sh"
+  load "${DIR}/../wd/wd.sh"
 }
 
 @test "store current directory" {
