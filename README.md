@@ -51,24 +51,24 @@ Here's all the commands:
 |Command |Description
 |------- |-----------
 | `wd`   |Jump to the directory stored in the default slot 0
-| `wds`  |Store the current working directory in the default slot (slot 0)
+| `wds`  |Store the current directory in the default slot 0
 | `wd1`  |Jump to the directory in slot 1
-| `wds3` |Store the current directory in slot 3
+| `wds2` |Store the current directory in slot 2
 | `wdl`  |Display all slot contents
 | `wdc`  |Clear all slots (prints cleared scheme first!)
 | `wdscheme` |Print the name of the current scheme
 
-Note that the numbers are just shown as examples, any slot between 0 and 9 could
-be used, e.g. `wd9`.
+Note that the numbers are just shown as examples, any slot number between 0 and
+9 could be used, e.g. `wd9`.
 
 Slot contents will persist across and between shell sessions because the current
-scheme is stored in a file in your $WDHOME directory.
+scheme is stored in a file in your `$WDHOME` directory.
 
 It's possible to clear a single slot by setting it to a period (`.`), e.g.:
 
     wds3 .
 
-The result is slot 3 becoming "empty", as if it'd never been set.
+The result is slot 3 becoming "empty", as if it had never been set.
 
 A set of environment variables, one for each slot—`$WD0`, `$WD1`,
 etc.—are created and updated as you modify the slots. Note that these
