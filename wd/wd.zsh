@@ -4,7 +4,7 @@
 # See README.md for a description of this script
 
 # wd is a shell utility, so exit if not interactive:
-# [[ $- != *i* ]] && return
+[[ $- != *i* ]] && return
 setopt ksh_arrays
 autoload -U compinit && compinit
 autoload -U bashcompinit && bashcompinit
