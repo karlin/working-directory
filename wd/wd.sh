@@ -4,7 +4,7 @@
 # See README.md for a description of this script
 
 # wd is a shell utility, so exit if not interactive
-[[ $- != *i* ]] && return
+#[[ $- != *i* ]] && return
 # Note: the line above needs to be removed to run tests with bats!
 
 # When this script is sourced, clear any temporary scheme from the env:
@@ -55,6 +55,7 @@ _wd_stored_scheme_name()
         exec 7<&-
         return
       else
+        # if [[ "$scheme" == "$WD_DEFAULT_SCHEME_NAME" ]]
         >&2 echo "wd: no current scheme set, using default."
         _wd_use_default_scheme
         _wd_stored_scheme_name
@@ -210,7 +211,7 @@ _wd_scheme_completion()
   scheme_dir="${WDHOME}"
   cur="${COMP_WORDS[COMP_CWORD]}"
   COMPREPLY=()
-  cd "${scheme_dir}" || exit
+  cd "${scheme_dir}" || return
   schemes="$(compgen -o nospace -o filenames -G "${cur}*.scheme")"
   local IFS=$'\n'
   for scheme_comp in $schemes; do
@@ -220,7 +221,7 @@ _wd_scheme_completion()
     scheme_comp="${scheme_comp// /\\ }"
     COMPREPLY+=( "${scheme_comp//.scheme}" )
   done
-  cd "${saved_dir}" || exit
+  cd "${saved_dir}" || return
 }
 complete -o nospace -F _wd_scheme_completion wdscheme
 
@@ -281,7 +282,7 @@ wdretr()
     index=$((index + 1))
   done < "$(_wd_stored_scheme_file)"
   if [[ "${slots[$slot]}" != '.' ]] ;  then
-    cd "${slots[$slot]}" || exit
+    cd "${slots[$slot]}" || return
   fi
 }
 

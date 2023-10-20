@@ -211,7 +211,7 @@ _wd_scheme_completion()
   scheme_dir="${WDHOME}"
   cur="${COMP_WORDS[COMP_CWORD]}"
   COMPREPLY=()
-  cd "${scheme_dir}" || exit
+  cd "${scheme_dir}" || return
   schemes="$(compgen -o nospace -o filenames -G "${cur}*.scheme")"
   local IFS=$'\n'
   for scheme_comp in $schemes; do
@@ -221,7 +221,7 @@ _wd_scheme_completion()
     scheme_comp="${scheme_comp// /\\ }"
     COMPREPLY+=( "${scheme_comp//.scheme}" )
   done
-  cd "${saved_dir}" || exit
+  cd "${saved_dir}" || return
 }
 complete -o nospace -F _wd_scheme_completion wdscheme
 
@@ -281,7 +281,7 @@ wdretr()
     slots+=("$line")
   done < "$(_wd_stored_scheme_file)"
   if [[ "${slots[$slot]}" != '.' ]] ;  then
-    cd "${slots[$slot]}" || exit
+    cd "${slots[$slot]}" || return
   fi
   unsetopt ksh_arrays
 }
