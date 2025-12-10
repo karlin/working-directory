@@ -3,6 +3,12 @@
 * WDSCHEME override can't be "unset" in subshell expansions, maybe need to
   unroll nested functions?
 * Missing scheme when set via WDSCHEME env var could be better communicated
+* Bug with cd - after wds: takes you to $WDHOME. Update OLDPWD
+* Bug with wdscheme to new scheme after wdscheme -t: clones stored scheme
+
+### 3.2 - 2023-10-21
+* fix bugs in functions that would exit a shell on error
+* added tests for unrecoverable error cases
 
 ### 3.1 - 2022-07-01
 * use shellcheck

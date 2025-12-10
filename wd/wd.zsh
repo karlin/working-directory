@@ -177,11 +177,13 @@ _wd_load_wdenv
 # scheme to a default.
 wdscheme()
 {
-  local _temp_wdscheme shell_only
+  local shell_only
   if [[ -z "$1" ]] ; then
+    # No argument; print the current scheme.
     _wd_load_wdenv # refresh env vars
     _wd_stored_scheme_name
   else
+    # Set the current scheme to the one specifed in first arg.
     if [[ "-t" == "$1" ]] ; then
       shell_only=1
       shift

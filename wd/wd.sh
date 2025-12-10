@@ -3,9 +3,10 @@
 # Working Directory (wd)
 # See README.md for a description of this script
 
-# wd is a shell utility, so exit if not interactive
-#[[ $- != *i* ]] && return
-# Note: the line above needs to be removed to run tests with bats!
+# wd is a shell utility, so exit if not interactive:
+[[ $- != *i* ]] && return
+# Note: remove or comment this line before runing tests using bats!
+
 
 # When this script is sourced, clear any temporary scheme from the env:
 unset WDSCHEME
@@ -177,27 +178,35 @@ _wd_load_wdenv
 # scheme to a default.
 wdscheme()
 {
-  local _temp_wdscheme shell_only
+  local shell_only
+
   if [[ -z "$1" ]] ; then
+    # No argument; print the current scheme.
     _wd_load_wdenv # refresh env vars
     _wd_stored_scheme_name
   else
+    # Set the current scheme to the one specifed in first arg.
     if [[ "-t" == "$1" ]] ; then
+      # -t option means don't change the stored scheme
       shell_only=1
       shift
     else
+      # No -t means we will set and use the stored scheme
       unset WDSCHEME
     fi
     if [[ -f "${WDHOME}/${1}.scheme" ]] ; then
+      # The given scheme already exists
       _temp_wdscheme="$1"
       if [[ -n $shell_only ]] ; then
+        # If we are overriding only for this shell, set the env. var
         export WDSCHEME="$1"
       else
+        # Write the given scheme name into the stored current scheme file
         echo "$1" > "$(_wd_current_scheme_file)"
-        # unset WDSCHEME # TODO unset doesn't work inside subshell expansions
       fi
       _wd_load_wdenv
     else
+      # The given scheme does not exist, so initialize it
       _wd_init_wdscheme "$1"
     fi
   fi
@@ -338,3 +347,4 @@ _wd_create_aliases()
 }
 
 _wd_create_aliases
+
