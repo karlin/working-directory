@@ -3,9 +3,9 @@
 # Working Directory (wd)
 # See README.md for a description of this script
 
-# wd is a shell utility, so exit if not interactive:
-[[ $- != *i* ]] && return
-# Note: remove or comment this line before runing tests using bats!
+# wd is a shell utility, so exit if not interactive (unless testing):
+[[ $- != *i* && -z "$WD_TESTING" ]] && return
+# Note: set WD_TESTING=1 before running tests using bats!
 
 
 # When this script is sourced, clear any temporary scheme from the env:
